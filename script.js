@@ -100,8 +100,7 @@ const recipes = [
     {t:"Eggless Crème Brûlée",d:"Other Vegetarian",c:"Continental",en:"Whisk custard, cream, and vanilla. Bake and caramelize sugar on top.",img:"https://i.ytimg.com/vi/6tKF4xmDzR4/maxresdefault.jpg",yt:"https://youtu.be/6tKF4xmDzR4"},
     {t:"Mint Glazed Fruit Salad",d:"Jain",c:"Continental",en:"Dice fruits and toss with mint and lime syrup.",img:"https://i.ytimg.com/vi/B-IqMsheGGM/maxresdefault.jpg",yt:"https://youtu.be/B-IqMsheGGM"}
   ];
-  
-  let dietFilter='all', cuisineFilter='all';
+    let dietFilter='all', cuisineFilter='all';
   const langs={en:'English',ta:'Tamil',hi:'Hindi',kn:'Kannada',te:'Telugu'};
   let currentRecipe=null, currentLang='en';
   
