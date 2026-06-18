@@ -345,16 +345,49 @@ function renderCards(data){
   });
 }
 
-function openModal(r){
-  currentRecipe=r;currentLang='en';
-  const imgHtml=r.img?`<img class="modal-img" src="${r.img}" alt="${r.t}" onerror="this.outerHTML='<div class=\\'modal-img-ph\\'>🍽️</div>'">`:`<div class="modal-img-ph">🍽️</div>`;
-  document.getElementById('mImgWrap').innerHTML=imgHtml;
-  document.getElementById('mTitle').textContent=r.t;
-  document.getElementById('mMeta').innerHTML=`<span class="tag ${tagClass(r.d)} meta-pill">${tagEmoji(r.d)} ${r.d}</span><span class="meta-pill">🌍 ${r.c}</span>`;
+function openModal(r) {
+  currentRecipe = r;
+  currentLang = 'en';
+  const imgHtml = r.img ? `<img class="modal-img" src="${r.img}" alt="${r.t}" onerror="this.outerHTML='<div class=\\'modal-img-ph\\'>🍽️</div>'">` : `<div class="modal-img-ph">🍽️</div>`;
+  document.getElementById('mImgWrap').innerHTML = imgHtml;
+  document.getElementById('mTitle').textContent = r.t;
+  document.getElementById('mMeta').innerHTML = `<span class="tag ${tagClass(r.d)} meta-pill">${tagEmoji(r.d)} ${r.d}</span><span class="meta-pill">🌍 ${r.c}</span>`;
   renderLangTabs();
-  document.getElementById('mInstr').textContent=r[currentLang]||r.en;
-  if(r.yt){
-    const yta=document.getElementById('mYt');yta.href=r.yt;yta.style.display='inline-flex';
-  } else {document.getElementById('mYt').style.display='none';}
+  document.getElementById('mInstr').textContent = r[currentLang] || r.en;
+  const yta = document.getElementById('mYt');
+  if (r.yt) {
+    yta.href = r.yt;
+    yta.style.display = 'inline-flex';
+  } else {
+    yta.style.display = 'none';
+  }
   document.getElementById('overlay').classList.add('open');
-  document.body.style.overflow='
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = 'auto';
+}
+
+function closeOverlay(e) {
+  if (e.target.id === 'overlay') closeModal();
+}
+
+function renderLangTabs() {
+  const tabs = document.getElementById('langTabs');
+  tabs.innerHTML = '';
+  Object.keys(langs).forEach(l => {
+    const tab = document.createElement('button');
+    tab.className = `lang-tab ${currentLang === l ? 'active' : ''}`;
+    tab.textContent = langs[l];
+    tab.onclick = () => {
+      currentLang = l;
+      renderLangTabs();
+      document.getElementById('mInstr').textContent = currentRecipe[l] || currentRecipe.en;
+    };
+    tabs.appendChild(tab);
+  });
+}
+
+init();
