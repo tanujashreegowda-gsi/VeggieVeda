@@ -384,7 +384,7 @@ function renderLangTabs() {
     tab.onclick = () => {
       currentLang = l;
       renderLangTabs();
-      document.getElementById('mInstr').textContent = currentRecipe[l] || currentRecipe.en;
+      document.getElementById('mInstr').textContent = currentRecipe[currentLang] || currentRecipe.en;
     };
     tabs.appendChild(tab);
   });
