@@ -380,7 +380,7 @@ function renderLangTabs() {
   Object.keys(langs).forEach(l => {
     const tab = document.createElement('button');
     tab.className = `lang-tab ${currentLang === l ? 'active' : ''}`;
-    tab.textContent = langs[l];
+    tab.textContent = langs[1]; to tab.textContent = langs[l];
     tab.onclick = () => {
       currentLang = l;
       renderLangTabs();
