@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Admin = () => {
   const navigate = useNavigate();
+  
+  // Security State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [authError, setAuthError] = useState('');
+
+  // Recipe Form State
   const [title, setTitle] = useState('');
   const [cuisine, setCuisine] = useState('South Indian');
   const [diet, setDiet] = useState('Hindu Traditional');
@@ -11,6 +18,28 @@ const Admin = () => {
   const [youtube, setYoutube] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Check if already logged in during this session
+  useEffect(() => {
+    if (sessionStorage.getItem('admin_auth') === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  // Handle Password Submission
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // CHANGE THIS STRING TO WHATEVER PASSWORD YOU WANT:
+    if (passwordInput === 'veggie123') {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('admin_auth', 'true');
+      setAuthError('');
+    } else {
+      setAuthError('Incorrect password. Access denied.');
+      setPasswordInput('');
+    }
+  };
+
+  // Handle Recipe Submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title || !description) {
@@ -47,8 +76,51 @@ const Admin = () => {
     }, 2000);
   };
 
+  // Handle Logout
+  const handleLogout = () => {
+    sessionStorage.removeItem('admin_auth');
+    setIsAuthenticated(false);
+  };
+
+  // 1. SHOW LOGIN SCREEN IF NOT AUTHENTICATED
+  if (!isAuthenticated) {
+    return (
+      <div style={{ maxWidth: '400px', margin: '5rem auto', padding: '2.5rem', background: '#fff', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', textAlign: 'center' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+        <h2 style={{ color: '#2d6a4f', marginBottom: '0.5rem' }}>Admin Access</h2>
+        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Please enter the password to continue.</p>
+        
+        {authError && (
+          <div style={{ color: '#e63946', background: '#ffe5ec', padding: '0.8rem', borderRadius: '10px', marginBottom: '1.5rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
+            {authError}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <input 
+            type="password" 
+            placeholder="Enter Password..." 
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            style={{ padding: '1rem', borderRadius: '50px', border: '1px solid #d1d5db', outline: 'none', textAlign: 'center', fontSize: '1.1rem' }}
+          />
+          <button type="submit" style={{ padding: '1rem', background: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(45,106,79,0.3)' }}>
+            Enter
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // 2. SHOW DASHBOARD IF AUTHENTICATED
   return (
-    <div style={{ maxWidth: '600px', margin: '3rem auto', padding: '2.5rem', background: '#fff', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
+    <div style={{ maxWidth: '600px', margin: '3rem auto', padding: '2.5rem', background: '#fff', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', position: 'relative' }}>
+      
+      {/* Logout Button */}
+      <button onClick={handleLogout} style={{ position: 'absolute', top: '2rem', right: '2rem', background: '#e63946', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>
+        Logout
+      </button>
+
       <h2 style={{ color: '#2d6a4f', marginBottom: '1.5rem', textAlign: 'center' }}>Add New Recipe Form</h2>
       
       {successMsg && (
@@ -60,13 +132,13 @@ const Admin = () => {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
         <div>
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.4rem', color: '#4b5563' }}>Recipe Title *</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none' }} placeholder="e.g., Mysore Bonda" />
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', boxSizing: 'border-box' }} placeholder="e.g., Mysore Bonda" />
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '200px' }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.4rem', color: '#4b5563' }}>Cuisine Category</label>
-            <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', backgroundColor: '#fff' }}>
+            <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', backgroundColor: '#fff', boxSizing: 'border-box' }}>
               <option value="South Indian">South Indian</option>
               <option value="North Indian">North Indian</option>
               <option value="Thai">Thai</option>
@@ -76,9 +148,9 @@ const Admin = () => {
             </select>
           </div>
 
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: '200px' }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.4rem', color: '#4b5563' }}>Diet Type</label>
-            <select value={diet} onChange={(e) => setDiet(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', backgroundColor: '#fff' }}>
+            <select value={diet} onChange={(e) => setDiet(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', backgroundColor: '#fff', boxSizing: 'border-box' }}>
               <option value="Hindu Traditional">Hindu Traditional</option>
               <option value="Vegan">Vegan</option>
               <option value="Jain">Jain</option>
@@ -89,17 +161,17 @@ const Admin = () => {
 
         <div>
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.4rem', color: '#4b5563' }}>Instructions & Description *</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows="4" style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', resize: 'vertical' }} placeholder="Provide detailed cooking steps..."></textarea>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows="4" style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} placeholder="Provide detailed cooking steps..."></textarea>
         </div>
 
         <div>
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.4rem', color: '#4b5563' }}>Cover Image URL (Optional)</label>
-          <input type="url" value={image} onChange={(e) => setImage(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none' }} placeholder="https://example.com/image.jpg" />
+          <input type="url" value={image} onChange={(e) => setImage(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', boxSizing: 'border-box' }} placeholder="https://example.com/image.jpg" />
         </div>
 
         <div>
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.4rem', color: '#4b5563' }}>YouTube Link URL (Optional)</label>
-          <input type="url" value={youtube} onChange={(e) => setYoutube(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none' }} placeholder="https://youtu.be/..." />
+          <input type="url" value={youtube} onChange={(e) => setYoutube(e.target.value)} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', outline: 'none', boxSizing: 'border-box' }} placeholder="https://youtu.be/..." />
         </div>
 
         <button type="submit" style={{ width: '100%', padding: '1rem', background: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(45,106,79,0.3)', marginTop: '0.5rem' }}>
