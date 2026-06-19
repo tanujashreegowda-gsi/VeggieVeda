@@ -1,13 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const RecipeCard = ({ recipe }) => {
   const navigate = useNavigate();
+  const [lang, setLang] = useState('en');
+  const [translatedText, setTranslatedText] = useState(recipe.en);
+  
+  // We use a "cache" to remember translations so we don't ask the API twice for the same language
+  const [cache, setCache] = useState({ en: recipe.en });
 
-  // This function pings the chatbot!
+  const languages = [
+    { code: 'en', label: 'EN' },
+    { code: 'ta', label: 'TA' },
+    { code: 'te', label: 'TE' },
+    { code: 'hi', label: 'HI' },
+    { code: 'kn', label: 'KN' }
+  ];
+
   const handleAskAI = (e) => {
-    e.stopPropagation(); // Stops the card from navigating to the detail page
+    e.stopPropagation();
     window.dispatchEvent(new CustomEvent('ask-ai', { detail: recipe.t }));
+  };
+
+  const handleLangClick = async (e, code) => {
+    e.stopPropagation(); 
+    setLang(code);
+
+    // If we already translated this, pull it from our temporary memory
+    if (cache[code]) {
+      setTranslatedText(cache[code]);
+      return;
+    }
+
+    // Show a loading state
+    setTranslatedText("Translating...");
+
+    try {
+      // Call the free MyMemory Translation API
+      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(recipe.en)}&langpair=en|${code}`);
+      const data = await response.json();
+
+      if (data.responseData && data.responseData.translatedText) {
+        setTranslatedText(data.responseData.translatedText);
+        setCache(prev => ({ ...prev, [code]: data.responseData.translatedText }));
+      } else {
+        setTranslatedText(recipe.en); // Fallback to English if it fails
+      }
+    } catch (error) {
+      console.error("Translation Error:", error);
+      setTranslatedText(recipe.en);
+    }
   };
 
   return (
@@ -35,6 +77,30 @@ const RecipeCard = ({ recipe }) => {
           {recipe.c} • {recipe.d}
         </p>
 
+        {/* LANGUAGE TABS */}
+        <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.8rem', flexWrap: 'wrap' }}>
+          {languages.map(l => (
+            <button
+              key={l.code}
+              onClick={(e) => handleLangClick(e, l.code)}
+              style={{
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.75rem',
+                borderRadius: '6px',
+                border: lang === l.code ? 'none' : '1px solid #d1d5db',
+                background: lang === l.code ? '#2d6a4f' : '#f3f4f6',
+                color: lang === l.code ? '#fff' : '#4b5563',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                transition: 'all 0.2s'
+              }}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Dynamic Translated Text */}
         <p style={{ 
             fontSize: '1rem', 
             color: '#4b5563', 
@@ -45,10 +111,9 @@ const RecipeCard = ({ recipe }) => {
             overflow: 'hidden',
             marginBottom: '1.5rem'
         }}>
-          {recipe.en}
+          {translatedText}
         </p>
 
-        {/* Ask AI Button embedded in the card */}
         <div style={{ marginTop: 'auto' }}>
             <button 
               onClick={handleAskAI}
