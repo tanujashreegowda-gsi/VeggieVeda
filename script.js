@@ -100,127 +100,79 @@ const recipes = [
     {t:"Eggless Crème Brûlée",d:"Other Vegetarian",c:"Continental",en:"Whisk custard, cream, and vanilla. Bake and caramelize sugar on top.",img:"https://i.ytimg.com/vi/6tKF4xmDzR4/maxresdefault.jpg",yt:"https://youtu.be/6tKF4xmDzR4"},
     {t:"Mint Glazed Fruit Salad",d:"Jain",c:"Continental",en:"Dice fruits and toss with mint and lime syrup.",img:"https://i.ytimg.com/vi/B-IqMsheGGM/maxresdefault.jpg",yt:"https://youtu.be/B-IqMsheGGM"}
   ];
-    let dietFilter='all', cuisineFilter='all';
-  const langs={en:'English',ta:'Tamil',hi:'Hindi',kn:'Kannada',te:'Telugu'};
-  let currentRecipe=null, currentLang='en';
+  const langs = {en:'English', ta:'Tamil', hi:'Hindi', kn:'Kannada', te:'Telugu'};
+  let currentRecipe = null;
+  let currentLang = 'en';
   
-  function init(){
-    const cuisines=[...new Set(recipes.map(r=>r.c))].sort();
-    const cf=document.getElementById('cuisineFilters');
-    if (cf) {
-      const ab=document.createElement('button');
-      ab.className='filter-btn active';ab.textContent='All';ab.id='c-all';
-      ab.onclick=()=>setCuisine('all',ab);cf.appendChild(ab);
-      cuisines.forEach(c=>{
-        const b=document.createElement('button');b.className='filter-btn';b.textContent=c;b.id='c-'+c;
-        b.onclick=()=>setCuisine(c,b);cf.appendChild(b);
-      });
-    }
-    const statVegan = document.getElementById('statVegan');
-    if (statVegan) statVegan.textContent=recipes.filter(r=>r.d==='Vegan').length;
-    renderCards(recipes);
+  function init() {
+      renderCards(recipes);
+      renderFilters();
   }
   
-  function setDiet(f,btn){
-    dietFilter=f;
-    document.querySelectorAll('.filters-section>.filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');applyFilters();
-  }
-  
-  function setCuisine(c,btn){
-    cuisineFilter=c;
-    document.querySelectorAll('#cuisineFilters .filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');applyFilters();
-  }
-  
-  function applyFilters(){
-    const searchInput = document.getElementById('heroSearch');
-    const q = searchInput ? searchInput.value.toLowerCase() : '';
-    let f=recipes;
-    if(dietFilter!=='all')f=f.filter(r=>r.d===dietFilter);
-    if(cuisineFilter!=='all')f=f.filter(r=>r.c===cuisineFilter);
-    if(q)f=f.filter(r=>r.t.toLowerCase().includes(q)||r.c.toLowerCase().includes(q)||r.d.toLowerCase().includes(q)||r.en.toLowerCase().includes(q));
-    renderCards(f);
-  }
-  
-  function tagClass(d){
-    if(d==='Vegan')return 'tag-vegan';
-    if(d==='Jain')return 'tag-jain';
-    if(d==='Hindu Traditional')return 'tag-ht';
-    return 'tag-ov';
-  }
-  
-  function tagEmoji(d){
-    if(d==='Vegan')return '🌱';if(d==='Jain')return '☮️';
-    if(d==='Hindu Traditional')return '🪔';return '🥦';
-  }
-  
-  function renderCards(data){
-    const grid=document.getElementById('recipeGrid');
-    const empty=document.getElementById('emptyState');
-    const rc=document.getElementById('resultsCount');
-    if (!grid) return;
-    grid.innerHTML='';
-    if (rc) rc.textContent=data.length+' recipe'+(data.length!==1?'s':'');
-    if(!data.length){if (empty) empty.style.display='block'; return;}
-    if (empty) empty.style.display='none';
-    data.forEach(r=>{
-      const card=document.createElement('div');
-      card.className='card';
-      card.onclick=()=>openModal(r);
-      const imgHtml=r.img?`<img class="card-img" src="${r.img}" alt="${r.t}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-img-placeholder\\'>🍽️</div>'">`:`<div class="card-img-placeholder">🍽️</div>`;
-      card.innerHTML=`${imgHtml}<div class="card-body">
-        <div class="card-tags"><span class="tag ${tagClass(r.d)}">${tagEmoji(r.d)} ${r.d}</span><span class="tag tag-cuisine">${r.c}</span></div>
-        <h3>${r.t}</h3>
-        <div class="card-instr">${r.en}</div>
-      </div>`;
-      grid.appendChild(card);
-    });
+  function renderCards(data) {
+      const grid = document.getElementById('recipeGrid');
+      const emptyState = document.getElementById('emptyState');
+      grid.innerHTML = '';
+      
+      if (data.length === 0) {
+          emptyState.style.display = 'block';
+      } else {
+          emptyState.style.display = 'none';
+          data.forEach(r => {
+              const card = document.createElement('div');
+              card.className = 'card';
+              card.onclick = () => openModal(r);
+              card.innerHTML = `
+                  <img src="${r.img}" alt="${r.t}" onerror="this.src='https://via.placeholder.com/300'">
+                  <div class="card-body">
+                      <h3>${r.t}</h3>
+                      <p>${r.en.substring(0, 60)}...</p>
+                  </div>
+              `;
+              grid.appendChild(card);
+          });
+      }
+      document.getElementById('resultsCount').textContent = `Showing ${data.length} recipes`;
   }
   
   function openModal(r) {
-    currentRecipe = r;
-    currentLang = 'en';
-    const imgHtml = r.img ? `<img class="modal-img" src="${r.img}" alt="${r.t}" onerror="this.outerHTML='<div class=\\'modal-img-ph\\'>🍽️</div>'">` : `<div class="modal-img-ph">🍽️</div>`;
-    document.getElementById('mImgWrap').innerHTML = imgHtml;
-    document.getElementById('mTitle').textContent = r.t;
-    document.getElementById('mMeta').innerHTML = `<span class="tag ${tagClass(r.d)} meta-pill">${tagEmoji(r.d)} ${r.d}</span><span class="meta-pill">🌍 ${r.c}</span>`;
-    renderLangTabs();
-    document.getElementById('mInstr').textContent = r[currentLang] || r.en;
-    const yta = document.getElementById('mYt');
-    if (r.yt) {
-      yta.href = r.yt;
-      yta.style.display = 'inline-flex';
-    } else {
-      yta.style.display = 'none';
-    }
-    document.getElementById('overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+      currentRecipe = r;
+      currentLang = 'en';
+      document.getElementById('mImgWrap').innerHTML = `<img src="${r.img}" style="width:100%; border-radius:10px;">`;
+      document.getElementById('mTitle').textContent = r.t;
+      document.getElementById('mInstr').textContent = r.en;
+      
+      const yta = document.getElementById('mYt');
+      yta.href = r.yt || '#';
+      yta.style.display = r.yt ? 'inline-block' : 'none';
   
-  function closeModal() {
-    document.getElementById('overlay').classList.remove('open');
-    document.body.style.overflow = 'auto';
-  }
-  
-  function closeOverlay(e) {
-    if (e.target.id === 'overlay') closeModal();
+      renderLangTabs();
+      document.getElementById('overlay').classList.add('open');
   }
   
   function renderLangTabs() {
-    const tabs = document.getElementById('langTabs');
-    tabs.innerHTML = '';
-    Object.keys(langs).forEach(l => {
-      const tab = document.createElement('button');
-      tab.className = `lang-tab ${currentLang === l ? 'active' : ''}`;
-      tab.textContent = langs[l];
-      tab.onclick = () => {
-        currentLang = l;
-        renderLangTabs();
-        document.getElementById('mInstr').textContent = currentRecipe[currentLang] || currentRecipe.en;
-      };
-      tabs.appendChild(tab);
-    });
+      const tabs = document.getElementById('langTabs');
+      tabs.innerHTML = Object.keys(langs).map(l => 
+          `<button class="lang-tab ${currentLang === l ? 'active' : ''}" onclick="switchLang('${l}')">${langs[l]}</button>`
+      ).join('');
+  }
+  
+  function switchLang(lang) {
+      currentLang = lang;
+      document.getElementById('mInstr').textContent = currentRecipe[lang] || currentRecipe.en;
+      renderLangTabs();
+  }
+  
+  function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+  function closeOverlay(e) { if (e.target.id === 'overlay') closeModal(); }
+  
+  function applyFilters() {
+      const q = document.getElementById('heroSearch').value.toLowerCase();
+      renderCards(recipes.filter(r => r.t.toLowerCase().includes(q)));
+  }
+  
+  function renderFilters() {
+      // Basic setup for filters
   }
   
   init();

@@ -1,27 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VeggieVeda</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <nav>
-        <a class="logo" href="#">🌿<span class="logo-text">Veggie<span>Veda</span></span></a>
-        <div class="nav-links"><a href="#home">Home</a><a href="#about">About</a></div>
-    </nav>
-    <section id="home" class="hero">
-        <h1>Welcome to <span>VeggieVeda</span></h1>
-        <p>100 authentic vegetarian recipes, curated by R. Govinda Krishnan.</p>
-    </section>
-    <section id="about" class="about-section">
-        <h2>About Me</h2>
-        <p>Namaste, I am R. Govinda Krishnan. As an IT Accounting professional and Brahmin priest, I believe in "Brahmanam Bhojana Priyam." VeggieVeda is my effort to share the joy of pure, plant-based living.</p>
-    </section>
-    <main>
-        <div class="grid" id="recipeGrid"></div>
-    </main>
-    <script src="script.js"></script>
-</body>
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <script type="module" src="/src/data/main.jsx"></script>
+  </body>
 </html>
