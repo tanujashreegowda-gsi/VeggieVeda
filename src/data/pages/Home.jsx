@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
-import { recipes } from '../recipes.js'; 
+import { recipes as baseRecipes } from '../recipes.js'; 
 import RecipeCard from '../Components/RecipeCard.jsx'; 
 
 const Home = () => {
+  const [allRecipes] = useState(() => {
+    const local = localStorage.getItem('custom_recipes');
+    const custom = local ? JSON.parse(local) : [];
+    return [...baseRecipes, ...custom];
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [cuisine, setCuisine] = useState('All');
   const [diet, setDiet] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const cuisines = ['All', ...new Set(recipes.map(r => r.c))].sort();
-  const diets = ['All', ...new Set(recipes.map(r => r.d))].sort();
+  const cuisines = ['All', ...new Set(allRecipes.map(r => r.c))].sort();
+  const diets = ['All', ...new Set(allRecipes.map(r => r.d))].sort();
 
-  const filteredRecipes = recipes.filter(r => {
+  const filteredRecipes = allRecipes.filter(r => {
     const matchesSearch = r.t.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           r.en.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCuisine = cuisine === 'All' || r.c === cuisine;
@@ -35,26 +41,28 @@ const Home = () => {
 
   return (
     <div id="homePage">
-      <header className="hero" style={{ background: '#2d6a4f', color: '#fff', padding: '4rem 2rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '3.5rem', marginBottom: '1rem', fontWeight: '800' }}>Welcome to VeggieVeda</h1>
-        
-        {/* AUTHOR BADGE WITH PHOTO */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+      <header className="hero" style={{ background: '#2d6a4f', color: '#fff', padding: '4rem 2rem' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto 2.5rem auto', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
           <img 
             src="/profile.jpg" 
             alt="R. Govinda Krishnan" 
-            onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=Govinda+Krishnan&background=fff&color=2d6a4f&size=50"; }}
+            onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=Govinda+Krishnan&background=fff&color=2d6a4f&size=90"; }}
             style={{ 
-              width: '50px', 
-              height: '50px', 
+              width: '100px', 
+              height: '100px', 
               borderRadius: '50%', 
               objectFit: 'cover',
-              border: '2px solid #fff'
+              border: '3px solid #fff',
+              flexShrink: 0,
+              boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
             }} 
           />
-          <p style={{ fontSize: '1.1rem', margin: '0' }}>
-            100 authentic vegetarian recipes, curated by <strong>R. Govinda Krishnan</strong>.
-          </p>
+          <div style={{ textAlign: 'left' }}>
+            <h1 style={{ fontSize: '3.5rem', marginBottom: '0.5rem', fontWeight: '800', lineHeight: '1.1' }}>Welcome to VeggieVeda</h1>
+            <p style={{ fontSize: '1.2rem', margin: '0', opacity: '0.9' }}>
+              100 authentic vegetarian recipes, curated by <strong>R. Govinda Krishnan</strong>.
+            </p>
+          </div>
         </div>
         
         <div style={{ 

@@ -8,10 +8,10 @@ const Navbar = () => {
       <div className="nav-links">
         <Link to="/">Home</Link>
         <Link to="/about">About</Link>
+        <Link to="/admin" style={{ marginLeft: '1.5rem', fontWeight: 'bold', color: '#ffb703' }}>Admin</Link>
       </div>
     </nav>
   );
 };
 
-// This exact line below is what your app was crying out for!
 export default Navbar;
