@@ -1,4 +1,5 @@
 import React from 'react';
+import myPhoto from '../../assets/profile.jpg'; // <-- ADD THIS LINE
 
 const About = () => {
   return (
@@ -7,12 +8,12 @@ const About = () => {
         
         {/* ENLARGED PROFILE PICTURE */}
         <img 
-          src="/profile.jpg" 
+          src={myPhoto} // <-- CHANGE THIS FROM "/profile.jpg"
           alt="R. Govinda Krishnan" 
           onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=Govinda+Krishnan&background=2d6a4f&color=fff&size=240"; }}
           style={{ 
-            width: '240px',  /* Increased from 150px */
-            height: '240px', /* Increased from 150px */
+            width: '240px', 
+            height: '240px', 
             borderRadius: '50%', 
             objectFit: 'cover', 
             marginBottom: '2rem',

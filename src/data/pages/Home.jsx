@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { recipes as baseRecipes } from '../recipes.js'; 
 import RecipeCard from '../Components/RecipeCard.jsx'; 
+import myPhoto from '../../assets/profile.jpg'; // <-- ADD THIS LINE
 
 const Home = () => {
   const [allRecipes] = useState(() => {
@@ -43,8 +44,8 @@ const Home = () => {
     <div id="homePage">
       <header className="hero" style={{ background: '#2d6a4f', color: '#fff', padding: '4rem 2rem' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto 2.5rem auto', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
-          <img 
-            src="/profile.jpg" 
+        <img 
+            src={myPhoto} // <-- CHANGE THIS FROM "/profile.jpg"
             alt="R. Govinda Krishnan" 
             onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=Govinda+Krishnan&background=fff&color=2d6a4f&size=90"; }}
             style={{ 
@@ -56,6 +57,7 @@ const Home = () => {
               flexShrink: 0,
               boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
             }} 
+          
           />
           <div style={{ textAlign: 'left' }}>
             <h1 style={{ fontSize: '3.5rem', marginBottom: '0.5rem', fontWeight: '800', lineHeight: '1.1' }}>Welcome to VeggieVeda</h1>
