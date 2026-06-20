@@ -1,35 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { recipes as baseRecipes } from '../recipes.js';
+import { supabase } from '../supabaseClient.js'; // <-- Added Database Connection
 
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const recipeId = parseInt(id);
 
-  const [allRecipes] = useState(() => {
-    const local = localStorage.getItem('custom_recipes');
-    const custom = local ? JSON.parse(local) : [];
-    return [...baseRecipes, ...custom];
-  });
-
-  const recipe = allRecipes.find(r => r.id === parseInt(id));
-
-  const [isLiked, setIsLiked] = useState(() => {
-    return localStorage.getItem(`like_${id}`) === 'true';
-  });
-
+  // 1. Setup states
+  const [recipe, setRecipe] = useState(() => baseRecipes.find(r => r.id === recipeId) || null);
+  const [isLoading, setIsLoading] = useState(!recipe);
+  
+  const [isLiked, setIsLiked] = useState(() => localStorage.getItem(`like_${recipeId}`) === 'true');
   const [showShareToast, setShowShareToast] = useState(false);
   const [commentName, setCommentName] = useState('');
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState(() => {
-    const saved = localStorage.getItem(`comments_${id}`);
+    const saved = localStorage.getItem(`comments_${recipeId}`);
     return saved ? JSON.parse(saved) : [];
   });
 
   const [lang, setLang] = useState('en');
-  const [translatedText, setTranslatedText] = useState(recipe ? recipe.en : '');
-  const [cache, setCache] = useState({ en: recipe ? recipe.en : '' });
+  const [translatedText, setTranslatedText] = useState('');
+  const [cache, setCache] = useState({});
 
+  // 2. Fetch from cloud if it is a new recipe (ID > 1000)
+  useEffect(() => {
+    const fetchCloudRecipe = async () => {
+      if (!recipe) {
+        // Remove the 1000 offset to find the real Supabase ID
+        const dbId = recipeId - 1000;
+        const { data, error } = await supabase.from('recipes').select('*').eq('id', dbId).single();
+        
+        if (data) {
+          const cloudRecipe = { ...data, id: data.id + 1000 };
+          setRecipe(cloudRecipe);
+          setTranslatedText(cloudRecipe.en);
+          setCache({ en: cloudRecipe.en });
+        }
+        setIsLoading(false);
+      } else {
+        setTranslatedText(recipe.en);
+        setCache({ en: recipe.en });
+      }
+    };
+    fetchCloudRecipe();
+  }, [recipeId, recipe]);
+
+  if (isLoading) return <div style={{padding: '4rem', textAlign: 'center', fontSize: '1.2rem', color: '#2d6a4f'}}>Loading Recipe...</div>;
   if (!recipe) return <div style={{padding: '4rem', textAlign: 'center'}}>Recipe not found!</div>;
 
   const languages = [
@@ -65,7 +84,7 @@ const RecipeDetail = () => {
   const handleToggleLike = () => {
     const nextState = !isLiked;
     setIsLiked(nextState);
-    localStorage.setItem(`like_${id}`, String(nextState));
+    localStorage.setItem(`like_${recipeId}`, String(nextState));
   };
 
   const handleShare = () => {
@@ -86,7 +105,7 @@ const RecipeDetail = () => {
 
     const updatedComments = [newComment, ...comments];
     setComments(updatedComments);
-    localStorage.setItem(`comments_${id}`, JSON.stringify(updatedComments));
+    localStorage.setItem(`comments_${recipeId}`, JSON.stringify(updatedComments));
 
     setCommentName('');
     setCommentText('');
@@ -101,7 +120,6 @@ const RecipeDetail = () => {
       
       <img src={recipe.img} alt={recipe.t} style={{ width: '100%', height: '400px', objectFit: 'cover', borderRadius: '15px', marginTop: '1.5rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
       
-      {/* Interaction Panel */}
       <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid #f3f4f6' }}>
         <button onClick={handleToggleLike} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0.6rem 1.2rem', borderRadius: '50px', border: 'none', background: isLiked ? '#ffe5ec' : '#f3f4f6', color: isLiked ? '#ff0054' : '#4b5563', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>
           {isLiked ? '❤️ Liked' : '🤍 Like'}
@@ -139,7 +157,7 @@ const RecipeDetail = () => {
         ))}
       </div>
 
-      <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: '#4b5563', marginBottom: '2.5rem' }}>{translatedText || recipe.en}</p>
+      <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: '#4b5563', marginBottom: '2.5rem', whiteSpace: 'pre-wrap' }}>{translatedText}</p>
       
       {recipe.yt && (
         <div style={{ marginTop: '2rem', marginBottom: '3rem', borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem' }}>
@@ -149,7 +167,6 @@ const RecipeDetail = () => {
         </div>
       )}
 
-      {/* Discussion Boards */}
       <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '2rem' }}>
         <h3 style={{ color: '#2d6a4f', fontSize: '1.5rem', marginBottom: '1.5rem' }}>Visitor Discussion ({comments.length})</h3>
         

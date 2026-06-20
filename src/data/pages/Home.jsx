@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { recipes as baseRecipes } from '../recipes.js'; 
 import RecipeCard from '../Components/RecipeCard.jsx'; 
 import myPhoto from '../../assets/profile.jpg'; 
-import { supabase } from '../supabaseClient.js'; // <-- Connects to the database
+import { supabase } from '../supabaseClient.js'; 
 
 const Home = () => {
-  // State to hold both local and cloud recipes
   const [allRecipes, setAllRecipes] = useState(baseRecipes);
 
   // FETCH LIVE DATA FROM CLOUD
@@ -18,8 +17,10 @@ const Home = () => {
       if (error) {
         console.error("Error fetching cloud recipes:", error.message);
       } else if (data && data.length > 0) {
+        // Fix ID Collisions by adding 1000 to the cloud database IDs
+        const fixedCloudRecipes = data.map(r => ({ ...r, id: r.id + 1000 }));
         // Merge the original 100 recipes with the new cloud recipes
-        setAllRecipes([...baseRecipes, ...data]);
+        setAllRecipes([...baseRecipes, ...fixedCloudRecipes]);
       }
     };
 
@@ -31,7 +32,6 @@ const Home = () => {
   const [diet, setDiet] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Use allRecipes instead of baseRecipes to build categories
   const cuisines = ['All', ...new Set(allRecipes.map(r => r.c))].sort();
   const diets = ['All', ...new Set(allRecipes.map(r => r.d))].sort();
 
