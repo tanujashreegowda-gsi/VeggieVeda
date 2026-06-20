@@ -62,7 +62,7 @@ const Home = () => {
           <div style={{ textAlign: 'left' }}>
             <h1 style={{ fontSize: '3.5rem', marginBottom: '0.5rem', fontWeight: '800', lineHeight: '1.1' }}>Welcome to VeggieVeda</h1>
             <p style={{ fontSize: '1.2rem', margin: '0', opacity: '0.9' }}>
-              100 authentic vegetarian recipes, curated by <strong>R. Govinda Krishnan</strong>.
+              Authentic vegetarian recipes, curated by <strong>R. Govinda Krishnan</strong>.
             </p>
           </div>
         </div>

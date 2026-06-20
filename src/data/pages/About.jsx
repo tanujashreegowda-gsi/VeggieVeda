@@ -27,7 +27,7 @@ const About = () => {
         <div style={{ textAlign: 'left', fontSize: '1.15rem', color: '#4b5563', lineHeight: '1.8' }}>
           <p style={{ marginBottom: '1rem' }}>Namaste, I am R. Govinda Krishnan.</p>
           <p style={{ marginBottom: '1rem' }}>As an IT Accounting professional and Brahmin priest, I bridge the gap between technical precision and spiritual tradition. My journey is rooted in the belief that food is not just sustenance, but a sacred offering.</p>
-          <p style={{ marginBottom: '1rem' }}>The saying <em style={{ color: '#2d6a4f', fontWeight: 'bold' }}>"Brahmanam Bhojana Priyam"</em> (The Brahmin loves food) drives my passion. I have curated these 100 recipes to ensure that vegetarianism is not just a diet, but a vibrant, flavorful lifestyle that anyone can adopt.</p>
+          <p style={{ marginBottom: '1rem' }}>The saying <em style={{ color: '#2d6a4f', fontWeight: 'bold' }}>"Brahmanam Bhojana Priyam"</em> (The Brahmin loves food) drives my passion. I have curated these recipes to ensure that vegetarianism is not just a diet, but a vibrant, flavorful lifestyle that anyone can adopt.</p>
           <p style={{ marginBottom: '1rem' }}>Whether it is the traditional South Indian Sambar or the vibrant flavors of Thai and Burmese cuisine, VeggieVeda is my attempt to bring global plant-based wisdom to your kitchen.</p>
         </div>
       </div>
