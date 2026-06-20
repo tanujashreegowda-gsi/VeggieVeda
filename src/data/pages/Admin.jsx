@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient.js'; // <-- This connects to your new database!
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -25,10 +26,8 @@ const Admin = () => {
     }
   }, []);
 
-  // Handle Password Submission
   const handleLogin = (e) => {
     e.preventDefault();
-    // CHANGE THIS STRING TO WHATEVER PASSWORD YOU WANT:
     if (passwordInput === 'veggie123') {
       setIsAuthenticated(true);
       sessionStorage.setItem('admin_auth', 'true');
@@ -39,20 +38,15 @@ const Admin = () => {
     }
   };
 
-  // Handle Recipe Submission
-  const handleSubmit = (e) => {
+  // Handle Recipe Submission (NOW CONNECTED TO SUPABASE CLOUD)
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title || !description) {
       alert("Please fill in the title and description fields.");
       return;
     }
 
-    const local = localStorage.getItem('custom_recipes');
-    const customRecipes = local ? JSON.parse(local) : [];
-    const newId = 101 + customRecipes.length;
-
     const newRecipe = {
-      id: newId,
       t: title,
       c: cuisine,
       d: diet,
@@ -61,10 +55,18 @@ const Admin = () => {
       yt: youtube
     };
 
-    customRecipes.push(newRecipe);
-    localStorage.setItem('custom_recipes', JSON.stringify(customRecipes));
+    // SEND TO SUPABASE CLOUD
+    const { error } = await supabase
+      .from('recipes')
+      .insert([newRecipe]);
 
-    setSuccessMsg('✨ Recipe successfully added to VeggieVeda!');
+    if (error) {
+      console.error("Error saving recipe:", error.message);
+      alert("Failed to save recipe to cloud database. Check the console.");
+      return;
+    }
+
+    setSuccessMsg('✨ Recipe successfully saved to Cloud Database!');
     setTitle('');
     setDescription('');
     setImage('');
@@ -76,7 +78,6 @@ const Admin = () => {
     }, 2000);
   };
 
-  // Handle Logout
   const handleLogout = () => {
     sessionStorage.removeItem('admin_auth');
     setIsAuthenticated(false);
@@ -116,7 +117,6 @@ const Admin = () => {
   return (
     <div style={{ maxWidth: '600px', margin: '3rem auto', padding: '2.5rem', background: '#fff', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', position: 'relative' }}>
       
-      {/* Logout Button */}
       <button onClick={handleLogout} style={{ position: 'absolute', top: '2rem', right: '2rem', background: '#e63946', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}>
         Logout
       </button>
@@ -175,7 +175,7 @@ const Admin = () => {
         </div>
 
         <button type="submit" style={{ width: '100%', padding: '1rem', background: '#2d6a4f', color: '#fff', border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(45,106,79,0.3)', marginTop: '0.5rem' }}>
-          🚀 Publish New Recipe
+          🚀 Publish to Cloud Database
         </button>
       </form>
     </div>

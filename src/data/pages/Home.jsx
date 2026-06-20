@@ -1,20 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { recipes as baseRecipes } from '../recipes.js'; 
 import RecipeCard from '../Components/RecipeCard.jsx'; 
-import myPhoto from '../../assets/profile.jpg'; // <-- ADD THIS LINE
+import myPhoto from '../../assets/profile.jpg'; 
+import { supabase } from '../supabaseClient.js'; // <-- Connects to the database
 
 const Home = () => {
-  const [allRecipes] = useState(() => {
-    const local = localStorage.getItem('custom_recipes');
-    const custom = local ? JSON.parse(local) : [];
-    return [...baseRecipes, ...custom];
-  });
+  // State to hold both local and cloud recipes
+  const [allRecipes, setAllRecipes] = useState(baseRecipes);
+
+  // FETCH LIVE DATA FROM CLOUD
+  useEffect(() => {
+    const fetchCloudRecipes = async () => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('*');
+
+      if (error) {
+        console.error("Error fetching cloud recipes:", error.message);
+      } else if (data && data.length > 0) {
+        // Merge the original 100 recipes with the new cloud recipes
+        setAllRecipes([...baseRecipes, ...data]);
+      }
+    };
+
+    fetchCloudRecipes();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [cuisine, setCuisine] = useState('All');
   const [diet, setDiet] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Use allRecipes instead of baseRecipes to build categories
   const cuisines = ['All', ...new Set(allRecipes.map(r => r.c))].sort();
   const diets = ['All', ...new Set(allRecipes.map(r => r.d))].sort();
 
@@ -43,9 +60,10 @@ const Home = () => {
   return (
     <div id="homePage">
       <header className="hero" style={{ background: '#2d6a4f', color: '#fff', padding: '4rem 2rem' }}>
+        
         <div style={{ maxWidth: '900px', margin: '0 auto 2.5rem auto', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
-        <img 
-            src={myPhoto} // <-- CHANGE THIS FROM "/profile.jpg"
+          <img 
+            src={myPhoto} 
             alt="R. Govinda Krishnan" 
             onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=Govinda+Krishnan&background=fff&color=2d6a4f&size=90"; }}
             style={{ 
@@ -57,26 +75,16 @@ const Home = () => {
               flexShrink: 0,
               boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
             }} 
-          
           />
           <div style={{ textAlign: 'left' }}>
             <h1 style={{ fontSize: '3.5rem', marginBottom: '0.5rem', fontWeight: '800', lineHeight: '1.1' }}>Welcome to VeggieVeda</h1>
             <p style={{ fontSize: '1.2rem', margin: '0', opacity: '0.9' }}>
-              Authentic vegetarian recipes, curated by <strong>R. Govinda Krishnan</strong>.
+              100+ authentic vegetarian recipes, curated by <strong>R. Govinda Krishnan</strong>.
             </p>
           </div>
         </div>
         
-        <div style={{ 
-            maxWidth: '900px', 
-            margin: '0 auto', 
-            display: 'flex', 
-            flexDirection: 'row', 
-            flexWrap: 'wrap', 
-            gap: '1rem',
-            justifyContent: 'center',
-            alignItems: 'center'
-        }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', alignItems: 'center' }}>
             <input 
               type="text" 
               placeholder="Search by recipe name or ingredients..." 
